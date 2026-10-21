@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "VANTA Studio — Personalize sua carteira digital" },
+      { name: "description", content: "Explore e personalize designs premium para carteiras digitais. Protótipo visual demonstrativo do VANTA Studio." },
+      { name: "author", content: "VANTA Studio" },
+      { property: "og:title", content: "VANTA Studio" },
+      { property: "og:description", content: "Designs premium para sua carteira digital." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@VANTAStudio" },
     ],
     links: [
       {
