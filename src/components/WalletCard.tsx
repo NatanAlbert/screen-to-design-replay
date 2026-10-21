@@ -83,6 +83,21 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
         ? "right-[7%] bottom-[9%] text-right"
         : "left-[7%] bottom-[9%]";
 
+  if (design.id === "spider-man-webline") {
+    const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)" : config.color === "silver" ? "grayscale(.65) brightness(1.12)" : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)" : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)" : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)" : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "none";
+    const finish = config.material === "matte" ? "saturate(.82) contrast(.96)" : config.material === "polished" ? "contrast(1.12) saturate(1.08)" : config.material === "brushed" ? "contrast(1.08) saturate(.92)" : config.material === "carbon" ? "contrast(1.18) brightness(.88)" : "contrast(1.02)";
+    return (
+      <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw] bg-[#080b10]">
+        <img src="/card.jpeg" alt="Spider-Man card artwork" className="absolute inset-0 h-full w-full object-cover" style={{ filter: `${tint} ${finish}`, transform: "scale(1.001)" }} />
+        <div className="pointer-events-none absolute inset-0" style={{ background: config.material === "polished" ? "linear-gradient(118deg,transparent 18%,rgba(255,255,255,.48) 34%,transparent 48%,rgba(255,255,255,.12) 62%,transparent 78%)" : config.material === "brushed" ? "repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 1px,transparent 1px 4px)" : config.material === "carbon" ? "repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)" : "linear-gradient(145deg,rgba(255,255,255,.10),transparent 35%,rgba(0,0,0,.15))", mixBlendMode: "soft-light" }} />
+        {config.pattern !== "plain" && <PatternLayer pattern={config.pattern} color={accent} />}
+        <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 ${config.accent === "black" ? "1px" : "2px"} ${accent}aa, inset 0 0 0 5px rgba(0,0,0,.12), inset 0 -2px 5px rgba(0,0,0,.35)` }} />
+        {config.text && <div className={`absolute z-10 ${pos} max-w-[86%] truncate px-2 text-[4.4cqw] tracking-[0.12em] uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]`} style={{ color: config.color === "silver" || config.color === "gold" ? "#fff8e8" : "#fff", fontFamily: FONT_FAMILY[config.font], fontSize: config.font === "serif" ? "6cqw" : undefined, letterSpacing: config.font === "serif" ? "0.02em" : undefined }}>{config.text}</div>}
+        <div className="pointer-events-none absolute inset-0" style={{ background: config.pattern === "metallic" ? `linear-gradient(110deg,transparent 28%,${accent}44 48%,transparent 68%)` : "transparent" }} />
+      </div>
+    );
+  }
+
   return (
     <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw]" style={{ background: surface(config.material, base.hex) }}>
       <PatternLayer pattern={config.pattern} color={accent} />
