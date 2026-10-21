@@ -7,6 +7,16 @@ export type Pattern = "lines" | "geometric" | "industrial" | "plain" | "metallic
 export type Accent = "silver" | "gold" | "black" | "neutral";
 export type FontId = "sans" | "mono" | "serif";
 export type TextPos = "bottom-left" | "bottom-right" | "center";
+export type IssuerId = "none" | "nubank" | "inter" | "c6" | "neon";
+export type NetworkId = "none" | "visa" | "mastercard" | "elo" | "amex";
+export const ISSUERS: { id: IssuerId; label: string }[] = [
+  { id: "none", label: "Sem emissor" }, { id: "nubank", label: "Nubank" },
+  { id: "inter", label: "Inter" }, { id: "c6", label: "C6 Bank" }, { id: "neon", label: "Neon" },
+];
+export const NETWORKS: { id: NetworkId; label: string }[] = [
+  { id: "none", label: "Sem bandeira" }, { id: "visa", label: "Visa" },
+  { id: "mastercard", label: "Mastercard" }, { id: "elo", label: "Elo" }, { id: "amex", label: "American Express" },
+];
 export type Collection = "Titanium" | "Noir" | "Chrome" | "Minimal" | "Signature" | "Industrial";
 
 export const MATERIALS: Material[] = ["matte", "brushed", "polished", "carbon", "satin"];
@@ -47,6 +57,8 @@ export interface CardConfig {
   text: string;
   font: FontId;
   textPos: TextPos;
+  issuer: IssuerId;
+  network: NetworkId;
 }
 
 export interface Design {
@@ -121,6 +133,8 @@ export const defaultConfig = (d: Design): CardConfig => ({
   text: "VANTA MEMBER",
   font: "sans",
   textPos: "bottom-left",
+  issuer: "none",
+  network: "none",
 });
 
 /** Coerce a config so it only uses options the design allows. */
@@ -134,6 +148,8 @@ export function sanitizeConfig(c: CardConfig): CardConfig {
     color: pick(c.color, d.allowed.colors, d.defaults.color),
     pattern: pick(c.pattern, d.allowed.patterns, d.defaults.pattern),
     accent: pick(c.accent, d.allowed.accents, d.defaults.accent),
-    text: c.text.slice(0, TEXT_MAX),
+    text: (c.text ?? "").slice(0, TEXT_MAX),
+    issuer: ISSUERS.some((item) => item.id === c.issuer) ? c.issuer : "none",
+    network: NETWORKS.some((item) => item.id === c.network) ? c.network : "none",
   };
 }
