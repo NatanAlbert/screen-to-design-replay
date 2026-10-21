@@ -78,16 +78,37 @@ async function downloadCardPng(node: HTMLElement, filename: string) {
   const markup = new XMLSerializer().serializeToString(clone);
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="757" viewBox="0 0 600 378"><foreignObject width="600" height="378"><div xmlns="http://www.w3.org/1999/xhtml" style="width:600px;height:378px;overflow:hidden">' + markup + '</div></foreignObject></svg>';
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+  let downloadUrl: string | undefined;
   try {
-    const img = new Image(); img.src = url;
-    await new Promise<void>((resolve, reject) => { img.onload = () => resolve(); img.onerror = () => reject(new Error("PNG render failed")); });
-    const canvas = document.createElement("canvas"); canvas.width = 1200; canvas.height = 757;
-    const ctx = canvas.getContext("2d"); if (!ctx) throw new Error("Canvas unavailable");
+    const img = new Image();
+    // Register handlers before assigning src: Safari can finish decoding a blob URL
+    // quickly enough that assigning src first occasionally misses the load event.
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("SVG preview could not be decoded by this browser"));
+      img.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 757;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas is unavailable");
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => b ? resolve(b) : reject(new Error("PNG conversion failed")), "image/png"));
-    const downloadUrl = URL.createObjectURL(blob); const link = document.createElement("a");
-    link.href = downloadUrl; link.download = filename; link.click(); window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-  } finally { URL.revokeObjectURL(url); }
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Canvas could not create a PNG")), "image/png");
+    });
+    downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    URL.revokeObjectURL(url);
+    if (downloadUrl) window.setTimeout(() => URL.revokeObjectURL(downloadUrl!), 1000);
+  }
 }
 function Heading({eyebrow,title,subtitle}:{eyebrow:string;title:string;subtitle?:string}){return <div><div className="eyebrow mb-4">{eyebrow}</div><h1 className="display text-4xl md:text-6xl">{title}</h1>{subtitle&&<p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{subtitle}</p>}</div>}
 function Options({title,children}:{title:string;children:ReactNode}){return <div className="space-y-3"><div className="eyebrow">{title}</div><div className="flex flex-wrap gap-2">{children}</div></div>}
