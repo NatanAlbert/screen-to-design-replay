@@ -54,7 +54,7 @@ function PatternLayer({ pattern, color }: { pattern: Pattern; color: string }) {
           {[[206, 10], [306, 10], [206, 190], [306, 190]].map(([x, y]) => (
             <circle key={`${x}${y}`} cx={x} cy={y} r="2.2" fill={color} fillOpacity={o + 0.1} />
           ))}
-          <text x="300" y="104" fontSize="6" fill={color} fillOpacity={o + 0.15} fontFamily="monospace" textAnchor="end" letterSpacing="1.5">VT-0{Math.round(Math.random() * 0) + 7}</text>
+          <text x="300" y="104" fontSize="6" fill={color} fillOpacity={o + 0.15} fontFamily="monospace" textAnchor="end" letterSpacing="1.5">VT-07</text>
         </svg>
       );
     case "metallic":
@@ -115,17 +115,6 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
       <div className="absolute right-[7%] top-[10%] font-mono text-[2.4cqw] uppercase tracking-[0.2em]" style={{ color: ink, opacity: 0.55 }}>
         {design.collection}
       </div>
-      {/* chip */}
-      <div
-        className="absolute left-[7%] top-[36%] h-[14cqw] w-[18cqw] rounded-[2cqw]"
-        style={{ background: `linear-gradient(135deg, ${accent}, ${accent}99 50%, ${accent})`, boxShadow: "inset 0 0 0 .3cqw rgba(0,0,0,.25)" }}
-      >
-        <div className="absolute inset-[22%] rounded-[1cqw]" style={{ border: ".3cqw solid rgba(0,0,0,.22)" }} />
-      </div>
-      {/* contactless */}
-      <svg className="absolute left-[29%] top-[39%] h-[8cqw] w-[8cqw]" viewBox="0 0 24 24" fill="none" stroke={ink} strokeOpacity=".55" strokeWidth="1.6" strokeLinecap="round">
-        <path d="M8 7c2 3 2 7 0 10M12 5c3 4 3 10 0 14M16 3c4 5 4 13 0 18" />
-      </svg>
       {config.text && (
         <div
           className={`absolute ${pos} max-w-[86%] truncate text-[4.4cqw] tracking-[0.12em] uppercase`}
