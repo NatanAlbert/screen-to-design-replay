@@ -112,7 +112,7 @@ export const DESIGNS: Design[] = seeds.map(([name, collection, material, color, 
   order: i,
 }));
 
-export const getDesign = (id?: string) => DESIGNS.find((d) => d.id === id) ?? DESIGNS[0];
+export const getDesign = (id?: string): Design => DESIGNS.find((d) => d.id === id) ?? DESIGNS[0]!;
 
 export const defaultConfig = (d: Design): CardConfig => ({
   designId: d.id,
