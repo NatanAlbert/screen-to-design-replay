@@ -83,7 +83,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
         ? "right-[7%] bottom-[9%] text-right"
         : "left-[7%] bottom-[9%]";
 
-  if (design.id === "spider-man-webline") {
+  if (design.name === "Spider-Man — Webline") {
     const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)" : config.color === "silver" ? "grayscale(.65) brightness(1.12)" : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)" : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)" : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)" : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "none";
     const finish = config.material === "matte" ? "saturate(.82) contrast(.96)" : config.material === "polished" ? "contrast(1.12) saturate(1.08)" : config.material === "brushed" ? "contrast(1.08) saturate(.92)" : config.material === "carbon" ? "contrast(1.18) brightness(.88)" : "contrast(1.02)";
     return (
