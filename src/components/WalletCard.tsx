@@ -89,12 +89,26 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
     return (
       <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw] bg-[#080b10]">
         <img src="/daniel-vorcaro.png" alt="Daniel Vorcaro card artwork" className="absolute inset-0 h-full w-full object-cover" style={{ filter: `${tint} ${finish}`, transform: "scale(1.001)" }} />
-        <div className="absolute left-[6%] top-[7%] z-10 w-[25%] rounded-md bg-white/90 p-[1.2%] shadow-lg">
-          <img src="/banco-master.png" alt="Banco Master" className="block h-auto w-full object-contain" />
-        </div>
-        <div className="absolute right-[6%] top-[7%] z-10 w-[15%] rounded-md bg-white/90 p-[1.2%] shadow-lg">
-          <img src="/mastercard.png" alt="Mastercard" className="block h-auto w-full object-contain" />
-        </div>
+        {config.issuer === "banco-master" && (
+          <div className="absolute left-[6%] top-[7%] z-10 w-[25%] mix-blend-multiply">
+            <img src="/banco-master.png" alt="Banco Master" className="block h-auto w-full object-contain" />
+          </div>
+        )}
+        {config.issuer !== "none" && config.issuer !== "banco-master" && (
+          <div className="absolute left-[6%] top-[7%] z-10 text-[3.1cqw] font-semibold tracking-[0.12em] text-white drop-shadow-md">
+            {ISSUERS.find((item) => item.id === config.issuer)?.label.toUpperCase()}
+          </div>
+        )}
+        {config.network === "mastercard" && (
+          <div className="absolute bottom-[7%] right-[6%] z-10 w-[15%] mix-blend-multiply">
+            <img src="/mastercard.png" alt="Mastercard" className="block h-auto w-full object-contain" />
+          </div>
+        )}
+        {config.network !== "none" && config.network !== "mastercard" && (
+          <div className="absolute bottom-[8%] right-[6%] z-10 text-[2.8cqw] font-semibold tracking-[0.1em] text-white drop-shadow-md">
+            {NETWORKS.find((item) => item.id === config.network)?.label.toUpperCase()}
+          </div>
+        )}
         <div className="pointer-events-none absolute inset-0" style={{ background: config.material === "polished" ? "linear-gradient(118deg,transparent 18%,rgba(255,255,255,.48) 34%,transparent 48%,rgba(255,255,255,.12) 62%,transparent 78%)" : config.material === "brushed" ? "repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 1px,transparent 1px 4px)" : config.material === "carbon" ? "repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)" : "linear-gradient(145deg,rgba(255,255,255,.10),transparent 35%,rgba(0,0,0,.15))", mixBlendMode: "soft-light" }} />
         {config.pattern !== "plain" && <PatternLayer pattern={config.pattern} color={accent} />}
         <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 ${config.accent === "black" ? "1px" : "2px"} ${accent}aa, inset 0 0 0 5px rgba(0,0,0,.12), inset 0 -2px 5px rgba(0,0,0,.35)` }} />
