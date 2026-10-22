@@ -83,6 +83,17 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
         ? "right-[7%] bottom-[9%] text-right"
         : `left-[7%] ${config.lastFour ? "bottom-[18%]" : "bottom-[9%]"}`;
 
+  if (design.collection === "American Express") {
+    const image = design.id === "amex-kehind" ? "/amex%20kehind.jpeg" : "/amex.jpeg";
+    return (
+      <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw] bg-[#071a36]">
+        <img src={image} alt={design.name} className="absolute inset-0 h-full w-full object-cover" />
+        {config.text && <div className={`absolute z-10 ${pos} max-w-[86%] truncate px-2 text-[4.4cqw] tracking-[0.12em] uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]`} style={{ color: "#fff", fontFamily: FONT_FAMILY[config.font] }}>{config.text}</div>}
+        {config.lastFour && <div className="absolute bottom-[7%] left-[7%] z-10 whitespace-nowrap font-mono text-[4.5cqw] tracking-[0.11em] text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">•••• {config.lastFour}</div>}
+      </div>
+    );
+  }
+
   if (design.name === "Daniel Vorcaro — Banco Master") {
     const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)" : config.color === "silver" ? "grayscale(.65) brightness(1.12)" : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)" : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)" : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)" : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "none";
     const finish = config.material === "matte" ? "saturate(.82) contrast(.96)" : config.material === "polished" ? "contrast(1.12) saturate(1.08)" : config.material === "brushed" ? "contrast(1.08) saturate(.92)" : config.material === "carbon" ? "contrast(1.18) brightness(.88)" : "contrast(1.02)";
