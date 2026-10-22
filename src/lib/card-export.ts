@@ -34,8 +34,10 @@ export async function downloadCardPng(
       }
       const pngUrl = URL.createObjectURL(png);
       if (previewWindow && !previewWindow.closed) {
-        previewWindow.location.href = pngUrl;
-        // The image URL must remain alive while Safari displays it.
+        previewWindow.document.open();
+        previewWindow.document.write('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>VANTA PNG</title><style>html,body{margin:0;min-height:100%;background:#08090b}body{display:flex;align-items:center;justify-content:center}img{display:block;width:100%;height:auto;object-fit:contain}</style></head><body><img src="' + pngUrl + '" alt="VANTA customized card"></body></html>');
+        previewWindow.document.close();
+        // Keep the object URL alive while Safari displays the image.
         window.setTimeout(() => URL.revokeObjectURL(pngUrl), 120_000);
         return "opened";
       }
