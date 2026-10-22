@@ -90,7 +90,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
       <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw] bg-[#080b10]">
         <img src="/daniel-vorcaro.png" alt="Daniel Vorcaro card artwork" className="absolute inset-0 h-full w-full object-cover" style={{ filter: `${tint} ${finish}`, transform: "scale(1.001)" }} />
         {config.issuer === "banco-master" && (
-          <div className="absolute left-[3%] top-[7%] z-10 w-[52.8%]">
+          <div className="absolute left-[0.5%] top-[7%] z-10 w-[52.8%]">
             <img src="/banco-master.png" alt="Banco Master" className="block h-auto w-full object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
         )}
@@ -100,7 +100,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
           </div>
         )}
         {config.network === "mastercard" && (
-          <div className="absolute bottom-[5%] right-[10%] z-10 w-[50.4%]">
+          <div className="absolute bottom-[3%] right-[1%] z-10 w-[50.4%]">
             <img src="/mastercard.png" alt="Mastercard" className="block h-auto w-full object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
         )}
