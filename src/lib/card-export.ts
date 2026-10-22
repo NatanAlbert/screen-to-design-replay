@@ -28,7 +28,21 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
       <clipPath id="clip"><rect width="${width}" height="${height}" rx="39"/></clipPath>
     </defs>`;
   let artwork = "";
-  if (design.name === "Daniel Vorcaro — Banco Master") {
+  if (design.collection === "American Express") {
+    const imagePath = design.id === "amex-kehind" ? "/amex%20kehind.jpeg" : "/amex.jpeg";
+    const imageData = await (async () => {
+      const response = await fetch(imagePath, { credentials: "same-origin" });
+      if (!response.ok) throw new Error(`Não foi possível carregar ${imagePath}.`);
+      const blob = await response.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Não foi possível preparar a imagem."));
+        reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+        reader.readAsDataURL(blob);
+      });
+    })();
+    artwork += `<image href="${imageData}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
+  } else if (design.name === "Daniel Vorcaro — Banco Master") {
     const toDataUrl = async (path: string) => {
       const response = await fetch(path, { credentials: "same-origin" });
       if (!response.ok) throw new Error(`Não foi possível carregar ${path}.`);
@@ -59,22 +73,22 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   } else {
     artwork += `<rect width="${width}" height="${height}" fill="url(#base)"/>`;
   }
-  if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)"/>`;
-  if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)"/>`;
-  if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)"/>`;
-  if (config.material === "matte" || config.material === "satin") artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)"/>`;
-  if (config.pattern === "lines") {
+  if (design.collection !== "American Express" && config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)"/>`;
+  if (design.collection !== "American Express" && config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)"/>`;
+  if (design.collection !== "American Express" && config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)"/>`;
+  if (design.collection !== "American Express" && (config.material === "matte" || config.material === "satin")) artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)"/>`;
+  if (design.collection !== "American Express" && config.pattern === "lines") {
     for (let i = 0; i < 6; i++) artwork += `<path d="M${405 + i * 45} 0L856 ${324 - i * 48}" stroke="${accent}" stroke-opacity="${0.35 - i * 0.04}" stroke-width="1.6" fill="none"/>`;
-  } else if (config.pattern === "geometric") {
+  } else if (design.collection !== "American Express" && config.pattern === "geometric") {
     artwork += `<path d="M560 0L690 0 856 130 856 270 690 400 560 400 430 270 430 130Z M690 0L690 400 M430 130L856 270 M856 130L430 270" stroke="${accent}" stroke-opacity=".25" fill="none" stroke-width="2"/>`;
-  } else if (config.pattern === "industrial") {
+  } else if (design.collection !== "American Express" && config.pattern === "industrial") {
     artwork += `<rect x="530" width="326" height="540" fill="url(#grid)"/><path d="M530 0V540" stroke="${accent}" stroke-opacity=".35" stroke-width="2"/><text x="810" y="285" font-size="16" fill="${accent}" fill-opacity=".5" font-family="monospace" text-anchor="end" letter-spacing="4">VT-07</text>`;
-  } else if (config.pattern === "metallic") {
+  } else if (design.collection !== "American Express" && config.pattern === "metallic") {
     artwork += `<rect x="660" width="80" height="540" fill="${accent}" opacity=".22"/><rect x="685" width="28" height="540" fill="${accent}" opacity=".25"/>`;
   }
   const issuer = config.issuer !== "none" ? config.issuer.toUpperCase() : "VANTA";
   const network = config.network !== "none" ? config.network.toUpperCase() : design.collection.toUpperCase();
-  const labels = design.name === "Daniel Vorcaro — Banco Master" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer === "BANCO-MASTER" ? "BANCO MASTER" : issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
+  const labels = design.name === "Daniel Vorcaro — Banco Master" || design.collection === "American Express" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer === "BANCO-MASTER" ? "BANCO MASTER" : issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
   const cardText = config.text ? `<text x="${textX}" y="${textY}" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="${font}" font-size="${config.font === "serif" ? 52 : 38}" text-anchor="${textAnchor}" letter-spacing="${config.font === "serif" ? 1 : 4}">${escape(config.font === "serif" ? config.text : config.text.toUpperCase())}</text>` : "";
   const cardNumber = config.lastFour ? `<text x="60" y="500" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="monospace" font-size="42" text-anchor="start" letter-spacing="2.5" opacity=".94">•••• ${escape(config.lastFour)}</text>` : "";
   const demo = design.name === "Daniel Vorcaro — Banco Master" || config.textPos === "bottom-right" ? "" : `<text x="796" y="480" fill="${ink}" fill-opacity=".5" font-family="monospace" font-size="20" text-anchor="end" letter-spacing="4">DEMO</text>`;
