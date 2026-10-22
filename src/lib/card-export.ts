@@ -1,6 +1,10 @@
 import { ACCENT_HEX, COLORS, getDesign, type CardConfig } from "@/data/designs";
 
-export async function downloadCardPng(config: CardConfig, filename: string) {
+export async function downloadCardPng(config: CardConfig, filename: string): Promise<"downloaded" | "opened" | "shared"> {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  // Safari on iOS often ignores programmatic downloads from blob URLs. Open a tab
+  // during the original tap so the generated PNG can be shown as a saveable image.
+  const previewWindow = isIOS ? window.open("about:blank", "_blank") : null;
   const width = 856;
   const height = 540;
   const scale = 2;
@@ -70,11 +74,26 @@ export async function downloadCardPng(config: CardConfig, filename: string) {
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     const png = await new Promise<Blob>((resolve, reject) => canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Não foi possível criar o PNG.")), "image/png"));
     pngUrl = URL.createObjectURL(png);
+    if (isIOS) {
+      const file = new File([png], filename, { type: "image/png" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        if (previewWindow && !previewWindow.closed) previewWindow.close();
+        await navigator.share({ files: [file], title: filename });
+        return "shared";
+      }
+      if (previewWindow && !previewWindow.closed) {
+        previewWindow.location.href = pngUrl;
+        // Keep the object URL alive while the image is open for saving.
+        return "opened";
+      }
+      throw new Error("O Safari bloqueou a abertura da imagem. Permita pop-ups e tente novamente.");
+    }
     const link = document.createElement("a");
     link.href = pngUrl; link.download = filename; link.style.display = "none";
     document.body.appendChild(link); link.click(); link.remove();
+    return "downloaded";
   } finally {
     URL.revokeObjectURL(svgUrl);
-    if (pngUrl) window.setTimeout(() => URL.revokeObjectURL(pngUrl!), 5000);
+    if (pngUrl && !isIOS) window.setTimeout(() => URL.revokeObjectURL(pngUrl!), 5000);
   }
 }
