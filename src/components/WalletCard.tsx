@@ -81,7 +81,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
       ? "inset-x-0 top-1/2 -translate-y-1/2 text-center"
       : config.textPos === "bottom-right"
         ? "right-[7%] bottom-[9%] text-right"
-        : "left-[7%] bottom-[9%]";
+        : `left-[7%] ${config.lastFour ? "bottom-[18%]" : "bottom-[9%]"}`;
 
   if (design.name === "Daniel Vorcaro — Banco Master") {
     const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)" : config.color === "silver" ? "grayscale(.65) brightness(1.12)" : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)" : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)" : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)" : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "none";
@@ -113,6 +113,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
         {config.pattern !== "plain" && <PatternLayer pattern={config.pattern} color={accent} />}
         <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 ${config.accent === "black" ? "1px" : "2px"} ${accent}aa, inset 0 0 0 5px rgba(0,0,0,.12), inset 0 -2px 5px rgba(0,0,0,.35)` }} />
         {config.text && <div className={`absolute z-10 ${pos} max-w-[86%] truncate px-2 text-[4.4cqw] tracking-[0.12em] uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]`} style={{ color: config.color === "silver" || config.color === "gold" ? "#fff8e8" : "#fff", fontFamily: FONT_FAMILY[config.font], fontSize: config.font === "serif" ? "6cqw" : undefined, letterSpacing: config.font === "serif" ? "0.02em" : undefined }}>{config.text}</div>}
+        {config.lastFour && <div className="absolute bottom-[7%] left-[7%] z-10 whitespace-nowrap font-mono text-[2.8cqw] tracking-[0.16em] text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">•••• {config.lastFour}</div>}
         <div className="pointer-events-none absolute inset-0" style={{ background: config.pattern === "metallic" ? `linear-gradient(110deg,transparent 28%,${accent}44 48%,transparent 68%)` : "transparent" }} />
       </div>
     );
