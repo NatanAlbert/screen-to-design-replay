@@ -144,6 +144,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
           {config.text}
         </div>
       )}
+      {config.lastFour && <div className="absolute bottom-[7%] left-[7%] z-10 whitespace-nowrap font-mono text-[2.8cqw] tracking-[0.16em] drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]" style={{ color: ink }}>•••• {config.lastFour}</div>}
       {config.textPos !== "bottom-right" && (
         <div className="absolute bottom-[9%] right-[7%] font-mono text-[2.6cqw] tracking-[0.2em]" style={{ color: ink, opacity: 0.5 }}>
           DEMO
