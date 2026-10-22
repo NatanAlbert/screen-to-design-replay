@@ -1,163 +1,93 @@
-import { ACCENT_HEX, COLORS, ISSUERS, NETWORKS, getDesign, type CardConfig } from "@/data/designs";
+import { ACCENT_HEX, COLORS, getDesign, type CardConfig } from "@/data/designs";
 
-const WIDTH = 856;
-const HEIGHT = 540;
-const SCALE = 2;
-const RADIUS = 38 * SCALE;
-
-function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Não foi possível carregar a arte do cartão."));
-    image.src = src;
-  });
-}
-
-function drawPattern(ctx: CanvasRenderingContext2D, config: CardConfig, accent: string) {
-  const w = WIDTH, h = HEIGHT;
-  ctx.save();
-  ctx.strokeStyle = accent;
-  ctx.fillStyle = accent;
-  ctx.lineWidth = 1.2;
-  ctx.globalAlpha = 0.35;
-  if (config.pattern === "lines") {
-    for (let i = 0; i < 6; i++) {
-      ctx.globalAlpha = 0.35 - i * 0.04;
-      ctx.beginPath(); ctx.moveTo((150 + i * 26) / 316 * w, 0);
-      ctx.lineTo(w, (120 - i * 18) / 200 * h); ctx.stroke();
-    }
-  } else if (config.pattern === "geometric") {
-    ctx.globalAlpha = 0.18;
-    for (let x = w * 0.45; x < w + 30; x += 44) {
-      for (let y = -20; y < h + 30; y += 38) {
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 22, y + 19);
-        ctx.lineTo(x + 22, y + 57); ctx.lineTo(x, y + 76);
-        ctx.lineTo(x - 22, y + 57); ctx.lineTo(x - 22, y + 19); ctx.closePath(); ctx.stroke();
-      }
-    }
-    const fade = ctx.createLinearGradient(w * 0.35, 0, w, 0);
-    fade.addColorStop(0, "rgba(0,0,0,0)"); fade.addColorStop(1, "rgba(0,0,0,.9)");
-    ctx.globalAlpha = 0.35; ctx.fillStyle = fade; ctx.fillRect(0, 0, w, h);
-  } else if (config.pattern === "industrial") {
-    ctx.globalAlpha = 0.13;
-    for (let x = w * 0.62; x < w; x += 24) for (let y = 0; y < h; y += 24) {
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 24, y); ctx.lineTo(x + 24, y + 24); ctx.stroke();
-    }
-    ctx.globalAlpha = 0.35; ctx.fillRect(w * 0.62, 0, 2, h);
-    [[w*.65,25],[w*.97,25],[w*.65,h-25],[w*.97,h-25]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();});
-    ctx.font = "16px monospace"; ctx.textAlign = "right"; ctx.fillText("VT-07", w * .95, h * .53);
-  } else if (config.pattern === "metallic") {
-    const grad = ctx.createLinearGradient(w*.75,0,w*.88,0);
-    grad.addColorStop(0,"rgba(0,0,0,0)"); grad.addColorStop(.3,accent+"55");
-    grad.addColorStop(.5,accent+"aa"); grad.addColorStop(.7,accent+"55"); grad.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.globalAlpha = 1; ctx.fillStyle = grad; ctx.fillRect(w*.75,0,w*.13,h);
-  }
-  ctx.restore();
-}
-
-function drawFinish(ctx: CanvasRenderingContext2D, material: CardConfig["material"]) {
-  const w=WIDTH,h=HEIGHT;
-  ctx.save();
-  if (material === "matte") {
-    let g=ctx.createRadialGradient(w*.15,0,0,w*.15,0,w*.85);g.addColorStop(0,"rgba(255,255,255,.07)");g.addColorStop(1,"rgba(255,255,255,0)");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-    g=ctx.createRadialGradient(w,h,0,w,h,h);g.addColorStop(0,"rgba(0,0,0,.35)");g.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-  } else if (material === "brushed") {
-    for(let x=0;x<w;x+=6){ctx.fillStyle=x%3===0?"rgba(255,255,255,.035)":"rgba(0,0,0,.05)";ctx.fillRect(x,0,2,h);}
-    const g=ctx.createLinearGradient(0,0,w,0);g.addColorStop(0,"rgba(0,0,0,.18)");g.addColorStop(.42,"rgba(255,255,255,.2)");g.addColorStop(.68,"rgba(0,0,0,.12)");g.addColorStop(1,"rgba(255,255,255,.1)");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-  } else if (material === "polished") {
-    const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(.18,"rgba(255,255,255,0)");g.addColorStop(.34,"rgba(255,255,255,.42)");g.addColorStop(.46,"rgba(255,255,255,.04)");g.addColorStop(.58,"rgba(255,255,255,.18)");g.addColorStop(.86,"rgba(0,0,0,.3)");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-  } else if (material === "carbon") {
-    for(let x=-h;x<w;x+=10){ctx.strokeStyle="rgba(255,255,255,.07)";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+h,h);ctx.stroke();ctx.strokeStyle="rgba(0,0,0,.4)";ctx.beginPath();ctx.moveTo(x+h,0);ctx.lineTo(x,h);ctx.stroke();}
-    ctx.fillStyle="rgba(0,0,0,.18)";ctx.fillRect(0,0,w,h);
-  } else {
-    const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,"rgba(255,255,255,.2)");g.addColorStop(.45,"rgba(255,255,255,.02)");g.addColorStop(1,"rgba(0,0,0,.28)");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-  }
-  ctx.restore();
-}
-
-export async function downloadCardPng(config: CardConfig, filename = "vanta-card.png"): Promise<"downloaded" | "shared"> {
-  const canvas = document.createElement("canvas");
-  canvas.width = WIDTH * SCALE; canvas.height = HEIGHT * SCALE;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Este navegador não conseguiu criar a imagem PNG.");
-  ctx.scale(SCALE, SCALE);
-  roundedRect(ctx, 0, 0, WIDTH, HEIGHT, RADIUS / SCALE); ctx.clip();
-
+export async function downloadCardPng(config: CardConfig, filename: string): Promise<"downloaded" | "opened"> {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  // Safari on iOS often ignores programmatic downloads from blob URLs. Open a tab
+  // during the original tap so the generated PNG can be shown as a saveable image.
+  const previewWindow = isIOS ? window.open("about:blank", "_blank") : null;
+  const width = 856;
+  const height = 540;
+  const scale = 2;
   const design = getDesign(config.designId);
-  const base = COLORS[config.color].hex;
+  const base = COLORS[config.color];
   const accent = ACCENT_HEX[config.accent];
-  const spider = design.name === "Spider-Man — Webline";
-
-  if (spider) {
-    const image = await loadImage("/card.jpeg");
-    ctx.fillStyle = "#080b10"; ctx.fillRect(0,0,WIDTH,HEIGHT);
-    // Match object-fit: cover, then apply the selected tint/finish with canvas filters.
-    const scale = Math.max(WIDTH/image.width, HEIGHT/image.height);
-    const iw=image.width*scale, ih=image.height*scale;
-    const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)" : config.color === "silver" ? "grayscale(.65) brightness(1.12)" : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)" : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)" : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)" : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "";
-    const finish = config.material === "matte" ? "saturate(.82) contrast(.96)" : config.material === "polished" ? "contrast(1.12) saturate(1.08)" : config.material === "brushed" ? "contrast(1.08) saturate(.92)" : config.material === "carbon" ? "contrast(1.18) brightness(.88)" : "contrast(1.02)";
-    ctx.save(); ctx.filter = [tint,finish].filter(Boolean).join(" "); ctx.drawImage(image,(WIDTH-iw)/2,(HEIGHT-ih)/2,iw,ih); ctx.restore();
-    if(config.material==="polished"){const g=ctx.createLinearGradient(0,0,WIDTH,HEIGHT);g.addColorStop(.18,"transparent");g.addColorStop(.34,"rgba(255,255,255,.48)");g.addColorStop(.48,"transparent");g.addColorStop(.62,"rgba(255,255,255,.12)");g.addColorStop(.78,"transparent");ctx.fillStyle=g;ctx.fillRect(0,0,WIDTH,HEIGHT);}
-    else if(config.material==="brushed"){for(let x=0;x<WIDTH;x+=8){ctx.fillStyle="rgba(255,255,255,.08)";ctx.fillRect(x,0,2,HEIGHT);}}
-    else if(config.material==="carbon"){for(let x=-HEIGHT;x<WIDTH;x+=10){ctx.strokeStyle="rgba(0,0,0,.18)";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+HEIGHT,HEIGHT);ctx.stroke();}}
-    else {const g=ctx.createLinearGradient(0,0,WIDTH,HEIGHT);g.addColorStop(0,"rgba(255,255,255,.10)");g.addColorStop(.35,"transparent");g.addColorStop(1,"rgba(0,0,0,.15)");ctx.fillStyle=g;ctx.fillRect(0,0,WIDTH,HEIGHT);}
+  const ink = base.light ? "#191a1d" : "#f5f5f2";
+  const escape = (value: string) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[char]!);
+  const textAnchor = config.textPos === "center" ? "middle" : config.textPos === "bottom-right" ? "end" : "start";
+  const textX = config.textPos === "center" ? 428 : config.textPos === "bottom-right" ? 796 : 60;
+  const textY = config.textPos === "center" ? 285 : 470;
+  const font = config.font === "mono" ? "monospace" : config.font === "serif" ? "Georgia, serif" : "Arial, Helvetica, sans-serif";
+  const defs = `
+    <defs>
+      <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${base.hex}"/><stop offset=".58" stop-color="${base.hex}"/><stop offset="1" stop-color="#08090b" stop-opacity=".7"/></linearGradient>
+      <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".48" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
+      <linearGradient id="shine" x1="0" y1="0" x2="1" y2=".5"><stop offset=".18" stop-color="#fff" stop-opacity="0"/><stop offset=".34" stop-color="#fff" stop-opacity=".42"/><stop offset=".48" stop-color="#fff" stop-opacity=".04"/><stop offset=".7" stop-color="#000" stop-opacity=".2"/></linearGradient>
+      <pattern id="brush" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 1H5M0 3H5" stroke="#fff" stroke-opacity=".1"/></pattern>
+      <pattern id="carbon" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 0L10 10M10 0L0 10" stroke="#fff" stroke-opacity=".12" stroke-width="3"/></pattern>
+      <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="${accent}" stroke-opacity=".25"/></pattern>
+      <clipPath id="clip"><rect width="${width}" height="${height}" rx="39"/></clipPath>
+    </defs>`;
+  let artwork = "";
+  if (design.name === "Spider-Man — Webline") {
+    const response = await fetch("/card.jpeg", { credentials: "same-origin" });
+    if (!response.ok) throw new Error("Não foi possível carregar a arte do cartão.");
+    const blob = await response.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Não foi possível preparar a arte."));
+      reader.onerror = () => reject(new Error("Não foi possível ler a arte do cartão."));
+      reader.readAsDataURL(blob);
+    });
+    artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
   } else {
-    ctx.fillStyle=base;ctx.fillRect(0,0,WIDTH,HEIGHT);drawFinish(ctx,config.material);
-    const glare=ctx.createRadialGradient(WIDTH*.5,0,0,WIDTH*.5,0,WIDTH*.7);glare.addColorStop(0,"rgba(255,255,255,.3)");glare.addColorStop(1,"rgba(255,255,255,0)");ctx.fillStyle=glare;ctx.fillRect(0,0,WIDTH,HEIGHT);
+    artwork += `<rect width="${width}" height="${height}" fill="url(#base)"/>`;
   }
-
-  if(config.pattern!=="plain") drawPattern(ctx,config,accent);
-  if(spider && config.pattern==="metallic"){const g=ctx.createLinearGradient(WIDTH*.28,0,WIDTH*.68,HEIGHT);g.addColorStop(0,"transparent");g.addColorStop(.5,accent+"44");g.addColorStop(1,"transparent");ctx.fillStyle=g;ctx.fillRect(0,0,WIDTH,HEIGHT);}
-
-  if(spider){
-    ctx.strokeStyle=accent+"aa";ctx.lineWidth=config.accent==="black"?2:4;roundedRect(ctx,2,2,WIDTH-4,HEIGHT-4,38);ctx.stroke();
-    ctx.strokeStyle="rgba(0,0,0,.12)";ctx.lineWidth=10;roundedRect(ctx,5,5,WIDTH-10,HEIGHT-10,35);ctx.stroke();
-  } else {
-    ctx.strokeStyle="rgba(255,255,255,.14)";ctx.lineWidth=2;roundedRect(ctx,1,1,WIDTH-2,HEIGHT-2,38);ctx.stroke();
+  if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)"/>`;
+  if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)"/>`;
+  if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)"/>`;
+  if (config.material === "matte" || config.material === "satin") artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)"/>`;
+  if (config.pattern === "lines") {
+    for (let i = 0; i < 6; i++) artwork += `<path d="M${405 + i * 45} 0L856 ${324 - i * 48}" stroke="${accent}" stroke-opacity="${0.35 - i * 0.04}" stroke-width="1.6" fill="none"/>`;
+  } else if (config.pattern === "geometric") {
+    artwork += `<path d="M560 0L690 0 856 130 856 270 690 400 560 400 430 270 430 130Z M690 0L690 400 M430 130L856 270 M856 130L430 270" stroke="${accent}" stroke-opacity=".25" fill="none" stroke-width="2"/>`;
+  } else if (config.pattern === "industrial") {
+    artwork += `<rect x="530" width="326" height="540" fill="url(#grid)"/><path d="M530 0V540" stroke="${accent}" stroke-opacity=".35" stroke-width="2"/><text x="810" y="285" font-size="16" fill="${accent}" fill-opacity=".5" font-family="monospace" text-anchor="end" letter-spacing="4">VT-07</text>`;
+  } else if (config.pattern === "metallic") {
+    artwork += `<rect x="660" width="80" height="540" fill="${accent}" opacity=".22"/><rect x="685" width="28" height="540" fill="${accent}" opacity=".25"/>`;
   }
-
-  const ink = COLORS[config.color].light ? "rgba(10,10,12,.82)" : "rgba(245,245,242,.9)";
-  const font = config.font==="mono" ? "500 23px monospace" : config.font==="serif" ? "italic 34px Georgia, serif" : "500 25px Inter, Arial, sans-serif";
-  if(!spider){
-    ctx.fillStyle=ink;ctx.textAlign="left";ctx.font="600 28px Inter, Arial, sans-serif";ctx.fillText(config.issuer!=="none"?(ISSUERS.find(i=>i.id===config.issuer)?.label.toUpperCase()??"VANTA"):"VANTA",WIDTH*.07,HEIGHT*.16);
-    ctx.textAlign="right";ctx.globalAlpha=.7;ctx.font="500 14px monospace";ctx.fillText(config.network!=="none"?(NETWORKS.find(n=>n.id===config.network)?.label??design.collection):design.collection,WIDTH*.93,HEIGHT*.16);ctx.globalAlpha=1;
-    if(config.textPos!=="bottom-right"){ctx.textAlign="right";ctx.globalAlpha=.5;ctx.font="14px monospace";ctx.fillText("DEMO",WIDTH*.93,HEIGHT*.91);ctx.globalAlpha=1;}
+  const issuer = config.issuer !== "none" ? config.issuer.toUpperCase() : "VANTA";
+  const network = config.network !== "none" ? config.network.toUpperCase() : design.collection.toUpperCase();
+  const labels = design.name === "Spider-Man — Webline" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
+  const cardText = config.text ? `<text x="${textX}" y="${textY}" fill="${design.name === "Spider-Man — Webline" ? "#fff" : ink}" font-family="${font}" font-size="${config.font === "serif" ? 52 : 38}" text-anchor="${textAnchor}" letter-spacing="${config.font === "serif" ? 1 : 4}">${escape(config.font === "serif" ? config.text : config.text.toUpperCase())}</text>` : "";
+  const demo = design.name === "Spider-Man — Webline" || config.textPos === "bottom-right" ? "" : `<text x="796" y="480" fill="${ink}" fill-opacity=".5" font-family="monospace" font-size="20" text-anchor="end" letter-spacing="4">DEMO</text>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${defs}<g clip-path="url(#clip)">${artwork}<rect x="2" y="2" width="852" height="536" rx="37" fill="none" stroke="${accent}" stroke-opacity=".55" stroke-width="3"/>${labels}${cardText}${demo}</g></svg>`;
+  const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+  let pngUrl: string | undefined;
+  try {
+    const image = new Image();
+    await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error("O navegador não conseguiu renderizar o cartão SVG.")); image.src = svgUrl; });
+    const canvas = document.createElement("canvas");
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas indisponível neste navegador.");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const png = await new Promise<Blob>((resolve, reject) => canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Não foi possível criar o PNG.")), "image/png"));
+    pngUrl = URL.createObjectURL(png);
+    if (isIOS) {
+      if (previewWindow && !previewWindow.closed) {
+        previewWindow.location.href = pngUrl;
+        // Keep the object URL alive while the image is open for saving.
+        return "opened";
+      }
+      throw new Error("O Safari bloqueou a abertura da imagem. Permita pop-ups e tente novamente.");
+    }
+    const link = document.createElement("a");
+    link.href = pngUrl; link.download = filename; link.style.display = "none";
+    document.body.appendChild(link); link.click(); link.remove();
+    return "downloaded";
+  } finally {
+    URL.revokeObjectURL(svgUrl);
+    if (pngUrl && !isIOS) window.setTimeout(() => URL.revokeObjectURL(pngUrl!), 5000);
   }
-  if(config.text){
-    ctx.fillStyle=spider?(config.color==="silver"||config.color==="gold"?"#fff8e8":"#fff"):ink;
-    ctx.font=font;ctx.textBaseline="middle";ctx.textAlign=config.textPos==="center"?"center":config.textPos==="bottom-right"?"right":"left";
-    const x=config.textPos==="center"?WIDTH/2:config.textPos==="bottom-right"?WIDTH*.93:WIDTH*.07;
-    const y=config.textPos==="center"?HEIGHT/2:HEIGHT*.91;
-    let text=config.text.toLocaleUpperCase();
-    while(ctx.measureText(text).width>WIDTH*.82 && text.length>1) text=text.slice(0,-1);
-    ctx.fillText(text,x,y);
-  }
-
-  const blob = await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,"image/png"));
-  if(!blob || blob.size<1000) throw new Error("O PNG não foi gerado corretamente.");
-  const file = new File([blob],filename,{type:"image/png"});
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
-  if(isIOS && typeof navigator.share==="function" && navigator.canShare?.({files:[file]})){
-    await navigator.share({files:[file],title:filename}); return "shared";
-  }
-  const url=URL.createObjectURL(blob);
-  const anchor=document.createElement("a");anchor.href=url;anchor.download=filename;anchor.style.display="none";
-  document.body.appendChild(anchor);anchor.click();anchor.remove();
-  window.setTimeout(()=>URL.revokeObjectURL(url),30000);
-  return "downloaded";
 }
