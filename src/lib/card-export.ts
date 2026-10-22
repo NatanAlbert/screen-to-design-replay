@@ -19,7 +19,7 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   const font = config.font === "mono" ? "monospace" : config.font === "serif" ? "Georgia, serif" : "Arial, Helvetica, sans-serif";
   const defs = `
     <defs>
-      <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${base.hex}"/><stop offset=".58" stop-color="${base.hex}"/><stop offset="1" stop-color="#08090b" stop-opacity=".7"/></linearGradient>
+      <linearGradient id="topShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#08090b" stop-opacity=".72"/><stop offset="1" stop-color="#08090b" stop-opacity="0"/></linearGradient><linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${base.hex}"/><stop offset=".58" stop-color="${base.hex}"/><stop offset="1" stop-color="#08090b" stop-opacity=".7"/></linearGradient>
       <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".48" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
       <linearGradient id="shine" x1="0" y1="0" x2="1" y2=".5"><stop offset=".18" stop-color="#fff" stop-opacity="0"/><stop offset=".34" stop-color="#fff" stop-opacity=".42"/><stop offset=".48" stop-color="#fff" stop-opacity=".04"/><stop offset=".7" stop-color="#000" stop-opacity=".2"/></linearGradient>
       <pattern id="brush" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 1H5M0 3H5" stroke="#fff" stroke-opacity=".1"/></pattern>
@@ -28,17 +28,27 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
       <clipPath id="clip"><rect width="${width}" height="${height}" rx="39"/></clipPath>
     </defs>`;
   let artwork = "";
-  if (design.name === "Spider-Man — Webline") {
-    const response = await fetch("/card.jpeg", { credentials: "same-origin" });
-    if (!response.ok) throw new Error("Não foi possível carregar a arte do cartão.");
-    const blob = await response.blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Não foi possível preparar a arte."));
-      reader.onerror = () => reject(new Error("Não foi possível ler a arte do cartão."));
-      reader.readAsDataURL(blob);
-    });
-    artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
+  if (design.name === "Daniel Vorcaro — Banco Master") {
+    const toDataUrl = async (path: string) => {
+      const response = await fetch(path, { credentials: "same-origin" });
+      if (!response.ok) throw new Error(`Não foi possível carregar ${path}.`);
+      const blob = await response.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Não foi possível preparar a imagem."));
+        reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+        reader.readAsDataURL(blob);
+      });
+    };
+    const [portrait, bankLogo, networkLogo] = await Promise.all([
+      toDataUrl("/daniel-vorcaro.png"),
+      toDataUrl("/banco-master.png"),
+      toDataUrl("/mastercard.png"),
+    ]);
+    artwork += `<image href="${portrait}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
+    artwork += `<rect width="${width}" height="150" fill="url(#topShade)"/>`;
+    artwork += `<image href="${bankLogo}" x="52" y="38" width="180" height="72" preserveAspectRatio="xMidYMid meet"/>`;
+    artwork += `<image href="${networkLogo}" x="730" y="38" width="76" height="64" preserveAspectRatio="xMidYMid meet"/>`;
   } else {
     artwork += `<rect width="${width}" height="${height}" fill="url(#base)"/>`;
   }
@@ -57,9 +67,9 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   }
   const issuer = config.issuer !== "none" ? config.issuer.toUpperCase() : "VANTA";
   const network = config.network !== "none" ? config.network.toUpperCase() : design.collection.toUpperCase();
-  const labels = design.name === "Spider-Man — Webline" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
-  const cardText = config.text ? `<text x="${textX}" y="${textY}" fill="${design.name === "Spider-Man — Webline" ? "#fff" : ink}" font-family="${font}" font-size="${config.font === "serif" ? 52 : 38}" text-anchor="${textAnchor}" letter-spacing="${config.font === "serif" ? 1 : 4}">${escape(config.font === "serif" ? config.text : config.text.toUpperCase())}</text>` : "";
-  const demo = design.name === "Spider-Man — Webline" || config.textPos === "bottom-right" ? "" : `<text x="796" y="480" fill="${ink}" fill-opacity=".5" font-family="monospace" font-size="20" text-anchor="end" letter-spacing="4">DEMO</text>`;
+  const labels = design.name === "Daniel Vorcaro — Banco Master" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
+  const cardText = config.text ? `<text x="${textX}" y="${textY}" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="${font}" font-size="${config.font === "serif" ? 52 : 38}" text-anchor="${textAnchor}" letter-spacing="${config.font === "serif" ? 1 : 4}">${escape(config.font === "serif" ? config.text : config.text.toUpperCase())}</text>` : "";
+  const demo = design.name === "Daniel Vorcaro — Banco Master" || config.textPos === "bottom-right" ? "" : `<text x="796" y="480" fill="${ink}" fill-opacity=".5" font-family="monospace" font-size="20" text-anchor="end" letter-spacing="4">DEMO</text>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${defs}<g clip-path="url(#clip)">${artwork}<rect x="2" y="2" width="852" height="536" rx="37" fill="none" stroke="${accent}" stroke-opacity=".55" stroke-width="3"/>${labels}${cardText}${demo}</g></svg>`;
   const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
   let pngUrl: string | undefined;

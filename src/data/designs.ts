@@ -79,7 +79,7 @@ const DARK: ColorId[] = ["black", "graphite", "navy", "metalblue", "darkgreen", 
 const METALS: ColorId[] = ["silver", "graphite", "black", "metalblue", "gold", "rosegold"];
 
 const seeds: Seed[] = [
-  ["Spider-Man — Webline", "Signature", "satin", "darkpurple", "lines", "silver", "Arte original do Homem-Aranha com opções visuais dinâmicas.", "Original Spider-Man artwork with dynamic visual options.", { materials: ["matte", "satin", "polished"], colors: ["black", "graphite", "silver", "navy", "darkgreen", "gold", "darkpurple"], patterns: ["lines", "geometric", "plain"], accents: ["silver", "gold", "black", "neutral"] }],
+  ["Daniel Vorcaro — Banco Master", "Signature", "satin", "darkpurple", "lines", "silver", "Retrato de Daniel Vorcaro com identidade Banco Master e Mastercard.", "Daniel Vorcaro portrait with Banco Master and Mastercard branding.", { materials: ["matte", "satin", "polished"], colors: ["black", "graphite", "silver", "navy", "darkgreen", "gold", "darkpurple"], patterns: ["lines", "geometric", "plain"], accents: ["silver", "gold", "black", "neutral"] }],
   ["Titanium Silver", "Titanium", "brushed", "silver", "lines", "black", "Titânio escovado claro com linhas finas gravadas.", "Light brushed titanium with fine engraved lines.", { colors: METALS }],
   ["Titanium Black", "Titanium", "brushed", "black", "lines", "silver", "Titânio negro com reflexo frio e contido.", "Black titanium with a cold, restrained sheen.", { colors: DARK.concat("silver") }],
   ["Titanium Graphite", "Titanium", "satin", "graphite", "metallic", "silver", "Grafite acetinado com faixa metálica lateral.", "Satin graphite with a side metallic band.", { colors: METALS }],

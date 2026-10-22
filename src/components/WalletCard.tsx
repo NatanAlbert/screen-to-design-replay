@@ -83,12 +83,18 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
         ? "right-[7%] bottom-[9%] text-right"
         : "left-[7%] bottom-[9%]";
 
-  if (design.name === "Spider-Man — Webline") {
+  if (design.name === "Daniel Vorcaro — Banco Master") {
     const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)" : config.color === "silver" ? "grayscale(.65) brightness(1.12)" : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)" : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)" : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)" : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "none";
     const finish = config.material === "matte" ? "saturate(.82) contrast(.96)" : config.material === "polished" ? "contrast(1.12) saturate(1.08)" : config.material === "brushed" ? "contrast(1.08) saturate(.92)" : config.material === "carbon" ? "contrast(1.18) brightness(.88)" : "contrast(1.02)";
     return (
       <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw] bg-[#080b10]">
-        <img src="/card.jpeg" alt="Spider-Man card artwork" className="absolute inset-0 h-full w-full object-cover" style={{ filter: `${tint} ${finish}`, transform: "scale(1.001)" }} />
+        <img src="/daniel-vorcaro.png" alt="Daniel Vorcaro card artwork" className="absolute inset-0 h-full w-full object-cover" style={{ filter: `${tint} ${finish}`, transform: "scale(1.001)" }} />
+        <div className="absolute left-[6%] top-[7%] z-10 w-[25%] rounded-md bg-white/90 p-[1.2%] shadow-lg">
+          <img src="/banco-master.png" alt="Banco Master" className="block h-auto w-full object-contain" />
+        </div>
+        <div className="absolute right-[6%] top-[7%] z-10 w-[15%] rounded-md bg-white/90 p-[1.2%] shadow-lg">
+          <img src="/mastercard.png" alt="Mastercard" className="block h-auto w-full object-contain" />
+        </div>
         <div className="pointer-events-none absolute inset-0" style={{ background: config.material === "polished" ? "linear-gradient(118deg,transparent 18%,rgba(255,255,255,.48) 34%,transparent 48%,rgba(255,255,255,.12) 62%,transparent 78%)" : config.material === "brushed" ? "repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 1px,transparent 1px 4px)" : config.material === "carbon" ? "repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)" : "linear-gradient(145deg,rgba(255,255,255,.10),transparent 35%,rgba(0,0,0,.15))", mixBlendMode: "soft-light" }} />
         {config.pattern !== "plain" && <PatternLayer pattern={config.pattern} color={accent} />}
         <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 ${config.accent === "black" ? "1px" : "2px"} ${accent}aa, inset 0 0 0 5px rgba(0,0,0,.12), inset 0 -2px 5px rgba(0,0,0,.35)` }} />
