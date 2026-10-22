@@ -22,6 +22,7 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
       <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${base.hex}"/><stop offset=".58" stop-color="${base.hex}"/><stop offset="1" stop-color="#08090b" stop-opacity=".7"/></linearGradient>
       <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".48" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
       <linearGradient id="shine" x1="0" y1="0" x2="1" y2=".5"><stop offset=".18" stop-color="#fff" stop-opacity="0"/><stop offset=".34" stop-color="#fff" stop-opacity=".42"/><stop offset=".48" stop-color="#fff" stop-opacity=".04"/><stop offset=".7" stop-color="#000" stop-opacity=".2"/></linearGradient>
+      <linearGradient id="metallicBand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${accent}" stop-opacity="0"/><stop offset=".3" stop-color="${accent}" stop-opacity=".33"/><stop offset=".5" stop-color="${accent}" stop-opacity=".67"/><stop offset=".7" stop-color="${accent}" stop-opacity=".33"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></linearGradient>
       <pattern id="brush" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 1H5M0 3H5" stroke="#fff" stroke-opacity=".1"/></pattern>
       <pattern id="carbon" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 0L10 10M10 0L0 10" stroke="#fff" stroke-opacity=".12" stroke-width="3"/></pattern>
       <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="${accent}" stroke-opacity=".25"/></pattern>
@@ -69,7 +70,7 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   } else if (config.pattern === "industrial") {
     artwork += `<rect x="530" width="326" height="540" fill="url(#grid)"/><path d="M530 0V540" stroke="${accent}" stroke-opacity=".35" stroke-width="2"/><text x="810" y="285" font-size="16" fill="${accent}" fill-opacity=".5" font-family="monospace" text-anchor="end" letter-spacing="4">VT-07</text>`;
   } else if (config.pattern === "metallic") {
-    artwork += `<rect x="660" width="80" height="540" fill="${accent}" opacity=".22"/><rect x="685" width="28" height="540" fill="${accent}" opacity=".25"/>`;
+    artwork += `<rect x="736" width="77" height="540" fill="url(#metallicBand)"/>`;
   }
   const issuer = config.issuer !== "none" ? config.issuer.toUpperCase() : "VANTA";
   const network = config.network !== "none" ? config.network.toUpperCase() : design.collection.toUpperCase();
