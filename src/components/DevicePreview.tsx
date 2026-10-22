@@ -29,7 +29,7 @@ export function DevicePreview({ config }: { config: CardConfig }) {
               </div>
             </div>
             <div className="mt-[130px] text-center font-mono text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
-              {t("pv.demoCard")} · •••• 0000
+              {t("pv.demoCard")} · •••• {config.lastFour || "0000"}
             </div>
           </div>
         </div>
