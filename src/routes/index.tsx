@@ -66,26 +66,57 @@ function Vanta(){
  <div className="fixed bottom-3 right-3 z-30 hidden items-center gap-2 border border-white/10 bg-[#111215]/95 px-3 py-2 text-[10px] uppercase tracking-[.14em] text-muted-foreground shadow-xl sm:flex"><span className="size-1.5 rounded-full bg-signal"/>{t("common.demo")} / NO PAYMENT</div></div>;
 }
 async function downloadCardPng(node: HTMLElement, filename: string) {
-  const source = node.firstElementChild;
+  const source = node.firstElementChild as HTMLElement | null;
   if (!source) throw new Error("Card preview is empty");
+
+  // Safari can mark a canvas as unsafe when an SVG foreignObject references
+  // a normal image URL. Inline same-origin artwork before rasterizing.
   const clone = source.cloneNode(true) as HTMLElement;
+  const originalImages = Array.from(source.querySelectorAll("img"));
+  const clonedImages = Array.from(clone.querySelectorAll("img"));
+  await Promise.all(clonedImages.map(async (img, index) => {
+    const original = originalImages[index];
+    if (!original) return;
+    const src = original.currentSrc || original.src;
+    if (!src) return;
+    try {
+      const response = await fetch(src, { credentials: "same-origin" });
+      if (!response.ok) throw new Error(`Could not load card artwork (${response.status})`);
+      const blob = await response.blob();
+      img.src = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Could not inline card artwork"));
+        reader.onerror = () => reject(new Error("Could not read card artwork"));
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.warn("Could not inline card artwork for PNG export:", error);
+      // Preserve the specific reason instead of hiding it behind a generic browser message.
+      throw error;
+    }
+  }));
+
   const copyStyles = (from: Element, to: Element) => {
     const computed = window.getComputedStyle(from);
     to.setAttribute("style", Array.from(computed).map((key) => key + ":" + computed.getPropertyValue(key)).join(";"));
-    Array.from(from.children).forEach((child, i) => { const next = to.children[i]; if (next) copyStyles(child, next); });
+    Array.from(from.children).forEach((child, i) => {
+      const next = to.children[i];
+      if (next) copyStyles(child, next);
+    });
   };
   copyStyles(source, clone);
+
+  // Use an SVG image as an intermediate because the card is HTML/CSS based.
   const markup = new XMLSerializer().serializeToString(clone);
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="757" viewBox="0 0 600 378"><foreignObject width="600" height="378"><div xmlns="http://www.w3.org/1999/xhtml" style="width:600px;height:378px;overflow:hidden">' + markup + '</div></foreignObject></svg>';
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
   let downloadUrl: string | undefined;
   try {
     const img = new Image();
-    // Register handlers before assigning src: Safari can finish decoding a blob URL
-    // quickly enough that assigning src first occasionally misses the load event.
+    img.decoding = "sync";
     await new Promise<void>((resolve, reject) => {
       img.onload = () => resolve();
-      img.onerror = () => reject(new Error("SVG preview could not be decoded by this browser"));
+      img.onerror = () => reject(new Error("Safari could not render the card SVG"));
       img.src = url;
     });
     const canvas = document.createElement("canvas");
@@ -95,7 +126,11 @@ async function downloadCardPng(node: HTMLElement, filename: string) {
     if (!ctx) throw new Error("Canvas is unavailable");
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     const blob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Canvas could not create a PNG")), "image/png");
+      try {
+        canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Browser could not create a PNG from the canvas")), "image/png");
+      } catch (error) {
+        reject(error instanceof Error ? error : new Error(String(error)));
+      }
     });
     downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
