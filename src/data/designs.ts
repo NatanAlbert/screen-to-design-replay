@@ -17,14 +17,14 @@ export const NETWORKS: { id: NetworkId; label: string }[] = [
   { id: "none", label: "Sem bandeira" }, { id: "visa", label: "Visa" },
   { id: "mastercard", label: "Mastercard" }, { id: "elo", label: "Elo" }, { id: "amex", label: "American Express" },
 ];
-export type Collection = "Titanium" | "Noir" | "Chrome" | "Minimal" | "Signature" | "Industrial";
+export type Collection = "Titanium" | "Noir" | "Chrome" | "Minimal" | "Signature" | "Industrial" | "American Express";
 
 export const MATERIALS: Material[] = ["matte", "brushed", "polished", "carbon", "satin"];
 export const PATTERNS: Pattern[] = ["lines", "geometric", "industrial", "plain", "metallic"];
 export const ACCENTS: Accent[] = ["silver", "gold", "black", "neutral"];
 export const FONTS: FontId[] = ["sans", "mono", "serif"];
 export const TEXT_POSITIONS: TextPos[] = ["bottom-left", "bottom-right", "center"];
-export const COLLECTIONS: Collection[] = ["Titanium", "Noir", "Chrome", "Minimal", "Signature", "Industrial"];
+export const COLLECTIONS: Collection[] = ["Titanium", "Noir", "Chrome", "Minimal", "Signature", "Industrial", "American Express"];
 export const TEXT_MAX = 22;
 
 export const COLORS: Record<ColorId, { hex: string; light: boolean }> = {
@@ -105,6 +105,8 @@ const seeds: Seed[] = [
   ["Industrial Brushed", "Industrial", "brushed", "silver", "industrial", "black", "Alumínio escovado de usinagem.", "Machined brushed aluminum.", { colors: ["silver", "graphite", "white"] }],
   ["Industrial Carbon", "Industrial", "carbon", "graphite", "industrial", "silver", "Carbono técnico com marcações de série.", "Technical carbon with serial markings.", { materials: ["carbon", "matte"], colors: ["graphite", "black"] }],
   ["Industrial Titanium", "Industrial", "satin", "metalblue", "industrial", "silver", "Titânio de engenharia com grade de precisão.", "Engineering titanium with a precision grid.", { colors: ["metalblue", "graphite", "silver"] }],
+  ["Amex Kehind", "American Express", "satin", "navy", "plain", "silver", "Design American Express Kehind.", "American Express Kehind design."],
+  ["Amex", "American Express", "satin", "navy", "plain", "silver", "Design American Express clássico.", "Classic American Express design."] ,
 ];
 
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
