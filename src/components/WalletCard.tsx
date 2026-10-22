@@ -116,10 +116,10 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
       <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.3)" }} />
 
       <div className="absolute left-[7%] top-[9%] text-[5cqw] font-semibold tracking-[0.22em]" style={{ color: ink }}>
-        {config.issuer && config.issuer !== "none" ? ISSUERS.find((item) => item.id === config.issuer)?.label.toUpperCase() : BRAND}
+        {config.issuer === "banco-master" ? <img src="/banco-master.png" alt="Banco Master" className="h-[8cqw] max-w-[30%] object-contain object-left" /> : config.issuer && config.issuer !== "none" ? ISSUERS.find((item) => item.id === config.issuer)?.label.toUpperCase() : BRAND}
       </div>
       <div className="absolute right-[7%] top-[10%] max-w-[42%] truncate text-right font-mono text-[2.4cqw] uppercase tracking-[0.12em]" style={{ color: ink, opacity: 0.7 }}>
-        {config.network && config.network !== "none" ? NETWORKS.find((item) => item.id === config.network)?.label : design.collection}
+        {config.network === "mastercard" ? <img src="/mastercard.png" alt="Mastercard" className="ml-auto h-[8cqw] max-w-[24%] object-contain object-right" /> : config.network && config.network !== "none" ? NETWORKS.find((item) => item.id === config.network)?.label : design.collection}
       </div>
       {config.text && (
         <div

@@ -7,11 +7,11 @@ export type Pattern = "lines" | "geometric" | "industrial" | "plain" | "metallic
 export type Accent = "silver" | "gold" | "black" | "neutral";
 export type FontId = "sans" | "mono" | "serif";
 export type TextPos = "bottom-left" | "bottom-right" | "center";
-export type IssuerId = "none" | "nubank" | "inter" | "c6" | "neon";
+export type IssuerId = "none" | "nubank" | "inter" | "c6" | "neon" | "banco-master";
 export type NetworkId = "none" | "visa" | "mastercard" | "elo" | "amex";
 export const ISSUERS: { id: IssuerId; label: string }[] = [
   { id: "none", label: "Sem emissor" }, { id: "nubank", label: "Nubank" },
-  { id: "inter", label: "Inter" }, { id: "c6", label: "C6 Bank" }, { id: "neon", label: "Neon" },
+  { id: "inter", label: "Inter" }, { id: "c6", label: "C6 Bank" }, { id: "neon", label: "Neon" }, { id: "banco-master", label: "Banco Master" },
 ];
 export const NETWORKS: { id: NetworkId; label: string }[] = [
   { id: "none", label: "Sem bandeira" }, { id: "visa", label: "Visa" },
