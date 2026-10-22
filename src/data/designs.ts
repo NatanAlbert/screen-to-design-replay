@@ -131,7 +131,7 @@ export const getDesign = (id?: string): Design => DESIGNS.find((d) => d.id === i
 export const defaultConfig = (d: Design): CardConfig => ({
   designId: d.id,
   ...d.defaults,
-  text: "VANTA MEMBER",
+  text: "",
   lastFour: "",
   font: "sans",
   textPos: "bottom-left",
