@@ -44,14 +44,14 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
     artwork += `<image href="${portrait}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
     if (config.issuer === "banco-master") {
       const bankLogo = await toDataUrl("/banco-master.png");
-      artwork += `<image href="${bankLogo}" x="51" y="38" width="290" height="116" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
+      artwork += `<image href="${bankLogo}" x="51" y="38" width="350" height="140" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
     } else if (config.issuer !== "none") {
       const issuerLabel = config.issuer === "nubank" ? "NUBANK" : config.issuer === "inter" ? "INTER" : config.issuer === "c6" ? "C6 BANK" : config.issuer === "neon" ? "NEON" : config.issuer.toUpperCase();
       artwork += `<text x="52" y="86" fill="#fff" font-family="Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="4">${escape(issuerLabel)}</text>`;
     }
     if (config.network === "mastercard") {
       const networkLogo = await toDataUrl("/mastercard.png");
-      artwork += `<image href="${networkLogo}" x="582" y="414" width="274" height="110" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
+      artwork += `<image href="${networkLogo}" x="536" y="398" width="320" height="128" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
     } else if (config.network !== "none") {
       const networkLabel = config.network.toUpperCase();
       artwork += `<text x="804" y="490" fill="#fff" font-family="Arial, sans-serif" font-size="21" font-weight="600" text-anchor="end" letter-spacing="2">${escape(networkLabel)}</text>`;
@@ -76,7 +76,7 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   const network = config.network !== "none" ? config.network.toUpperCase() : design.collection.toUpperCase();
   const labels = design.name === "Daniel Vorcaro — Banco Master" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer === "BANCO-MASTER" ? "BANCO MASTER" : issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
   const cardText = config.text ? `<text x="${textX}" y="${textY}" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="${font}" font-size="${config.font === "serif" ? 52 : 38}" text-anchor="${textAnchor}" letter-spacing="${config.font === "serif" ? 1 : 4}">${escape(config.font === "serif" ? config.text : config.text.toUpperCase())}</text>` : "";
-  const cardNumber = config.lastFour ? `<text x="60" y="500" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="monospace" font-size="24" text-anchor="start" letter-spacing="3" opacity=".94">•••• ${escape(config.lastFour)}</text>` : "";
+  const cardNumber = config.lastFour ? `<text x="60" y="500" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="monospace" font-size="34" text-anchor="start" letter-spacing="3" opacity=".94">•••• ${escape(config.lastFour)}</text>` : "";
   const demo = design.name === "Daniel Vorcaro — Banco Master" || config.textPos === "bottom-right" ? "" : `<text x="796" y="480" fill="${ink}" fill-opacity=".5" font-family="monospace" font-size="20" text-anchor="end" letter-spacing="4">DEMO</text>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${defs}<g clip-path="url(#clip)">${artwork}<rect x="2" y="2" width="852" height="536" rx="37" fill="none" stroke="${accent}" stroke-opacity=".55" stroke-width="3"/>${labels}${cardText}${cardNumber}${demo}</g></svg>`;
   const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
