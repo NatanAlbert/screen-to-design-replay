@@ -68,10 +68,10 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
       URL.revokeObjectURL(sourceUrl);
     }
     artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
-    if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)" style="mix-blend-mode:soft-light"/>`;
-    else if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)" style="mix-blend-mode:soft-light"/>`;
-    else if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)" style="mix-blend-mode:soft-light"/>`;
-    else artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)" style="mix-blend-mode:soft-light"/>`;
+    if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)" opacity=".78"/>`;
+    else if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)" opacity=".9"/>`;
+    else if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)" opacity=".9"/>`;
+    else artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)" opacity=".62"/>`;
   } else {
     artwork += `<rect width="${width}" height="${height}" fill="url(#base)"/>`;
     if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)"/>`;
