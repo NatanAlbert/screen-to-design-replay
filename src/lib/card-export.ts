@@ -1,4 +1,4 @@
-import { toBlob } from "html-to-image";
+import { toPng } from "html-to-image";
 
 export async function downloadCardPng(
   element: HTMLElement,
@@ -8,41 +8,45 @@ export async function downloadCardPng(
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-  // Capture the actual rendered card so its artwork, color filter, finish,
-  // pattern, text and border all come from the same DOM the user customizes.
-  const png = await toBlob(element, {
+  // Render the live customized DOM as a PNG data URL. This keeps the artwork,
+  // CSS filters, material overlays, pattern, text and border in one capture.
+  const dataUrl = await toPng(element, {
     pixelRatio: 2,
     cacheBust: true,
     backgroundColor: "#08090b",
     width: element.getBoundingClientRect().width,
   });
 
-  if (!png) {
-    throw new Error("Não foi possível gerar o PNG do cartão. Tente novamente.");
+  if (!dataUrl.startsWith("data:image/png;base64,") || dataUrl.length < 1000) {
+    throw new Error("A imagem PNG não foi gerada corretamente.");
   }
 
-  if (isIOS) {
-    const file = new File([png], filename, { type: "image/png" });
+  const response = await fetch(dataUrl);
+  const png = await response.blob();
+  if (png.type !== "image/png" || png.size === 0) {
+    throw new Error("O PNG gerado está vazio ou inválido.");
+  }
 
-    // iOS browsers often ignore download= for Blob URLs. Only report success
-    // when the native share sheet actually accepts the PNG.
+  const file = new File([png], filename, { type: "image/png" });
+  if (isIOS) {
     if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
       await navigator.share({ files: [file], title: filename });
       return "shared";
     }
-    throw new Error("Este navegador não permite salvar o PNG diretamente. Abra o VANTA no Safari fora da prévia do Lovable e tente novamente.");
+
+    // No popup: show the generated image in the current tab so it can be
+    // long-pressed and saved from Safari's native image context menu.
+    window.location.href = dataUrl;
+    return "downloaded";
   }
 
-  // Desktop browsers support direct Blob URL downloads.
   const pngUrl = URL.createObjectURL(png);
   const link = document.createElement("a");
   link.href = pngUrl;
   link.download = filename;
-  link.style.position = "fixed";
-  link.style.left = "-10000px";
   document.body.appendChild(link);
   link.click();
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(pngUrl), isIOS ? 60_000 : 5_000);
+  window.setTimeout(() => URL.revokeObjectURL(pngUrl), 30_000);
   return "downloaded";
 }
