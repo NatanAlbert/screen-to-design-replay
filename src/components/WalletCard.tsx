@@ -90,7 +90,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
       <div className="@container absolute inset-0 overflow-hidden rounded-[4.6cqw] bg-[#080b10]">
         <img src="/daniel-vorcaro.png" alt="Daniel Vorcaro card artwork" className="absolute inset-0 h-full w-full object-cover" style={{ filter: `${tint} ${finish}`, transform: "scale(1.001)" }} />
         {config.issuer === "banco-master" && (
-          <div className="absolute left-[6%] top-[7%] z-10 w-[44%]">
+          <div className="absolute left-[3%] top-[7%] z-10 w-[52.8%]">
             <img src="/banco-master.png" alt="Banco Master" className="block h-auto w-full object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
         )}
@@ -100,7 +100,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
           </div>
         )}
         {config.network === "mastercard" && (
-          <div className="absolute bottom-[5%] right-[4%] z-10 w-[42%]">
+          <div className="absolute bottom-[5%] right-[10%] z-10 w-[50.4%]">
             <img src="/mastercard.png" alt="Mastercard" className="block h-auto w-full object-contain" style={{ mixBlendMode: "screen" }} />
           </div>
         )}
@@ -113,7 +113,7 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
         {config.pattern !== "plain" && <PatternLayer pattern={config.pattern} color={accent} />}
         <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: `inset 0 0 0 ${config.accent === "black" ? "1px" : "2px"} ${accent}aa, inset 0 0 0 5px rgba(0,0,0,.12), inset 0 -2px 5px rgba(0,0,0,.35)` }} />
         {config.text && <div className={`absolute z-10 ${pos} max-w-[86%] truncate px-2 text-[4.4cqw] tracking-[0.12em] uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]`} style={{ color: config.color === "silver" || config.color === "gold" ? "#fff8e8" : "#fff", fontFamily: FONT_FAMILY[config.font], fontSize: config.font === "serif" ? "6cqw" : undefined, letterSpacing: config.font === "serif" ? "0.02em" : undefined }}>{config.text}</div>}
-        {config.lastFour && <div className="absolute bottom-[7%] left-[7%] z-10 whitespace-nowrap font-mono text-[3.8cqw] tracking-[0.13em] text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">•••• {config.lastFour}</div>}
+        {config.lastFour && <div className="absolute bottom-[7%] left-[7%] z-10 whitespace-nowrap font-mono text-[4.5cqw] tracking-[0.11em] text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,.9)]">•••• {config.lastFour}</div>}
         <div className="pointer-events-none absolute inset-0" style={{ background: config.pattern === "metallic" ? `linear-gradient(110deg,transparent 28%,${accent}44 48%,transparent 68%)` : "transparent" }} />
       </div>
     );
@@ -131,10 +131,10 @@ export function CardFront({ config, glare = 50 }: { config: CardConfig; glare?: 
       <div className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.3)" }} />
 
       <div className="absolute left-[7%] top-[9%] text-[5cqw] font-semibold tracking-[0.22em]" style={{ color: ink }}>
-        {config.issuer === "banco-master" ? <img src="/banco-master.png" alt="Banco Master" className="h-[10.5cqw] max-w-[40%] object-contain object-left" /> : config.issuer && config.issuer !== "none" ? ISSUERS.find((item) => item.id === config.issuer)?.label.toUpperCase() : BRAND}
+        {config.issuer === "banco-master" ? <img src="/banco-master.png" alt="Banco Master" className="h-[12.6cqw] max-w-[48%] object-contain object-left" /> : config.issuer && config.issuer !== "none" ? ISSUERS.find((item) => item.id === config.issuer)?.label.toUpperCase() : BRAND}
       </div>
       <div className="absolute right-[7%] top-[10%] max-w-[42%] truncate text-right font-mono text-[2.4cqw] uppercase tracking-[0.12em]" style={{ color: ink, opacity: 0.7 }}>
-        {config.network === "mastercard" ? <img src="/mastercard.png" alt="Mastercard" className="ml-auto h-[10.5cqw] max-w-[34%] object-contain object-right" /> : config.network && config.network !== "none" ? NETWORKS.find((item) => item.id === config.network)?.label : design.collection}
+        {config.network === "mastercard" ? <img src="/mastercard.png" alt="Mastercard" className="ml-auto h-[12.6cqw] max-w-[40.8%] object-contain object-right" /> : config.network && config.network !== "none" ? NETWORKS.find((item) => item.id === config.network)?.label : design.collection}
       </div>
       {config.text && (
         <div
