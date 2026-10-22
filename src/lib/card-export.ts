@@ -27,7 +27,7 @@ export async function downloadCardPng(
     // Prefer the native iOS share sheet: it avoids Safari pop-up blocking and
     // lets the user choose Save Image or Save to Files.
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: filename, files: [file] });
+      await navigator.share({ files: [file], title: filename });
       return "shared";
     }
   }
