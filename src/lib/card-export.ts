@@ -40,15 +40,22 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
         reader.readAsDataURL(blob);
       });
     };
-    const [portrait, bankLogo, networkLogo] = await Promise.all([
-      toDataUrl("/daniel-vorcaro.png"),
-      toDataUrl("/banco-master.png"),
-      toDataUrl("/mastercard.png"),
-    ]);
+    const portrait = await toDataUrl("/daniel-vorcaro.png");
     artwork += `<image href="${portrait}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
-    artwork += `<rect width="${width}" height="150" fill="url(#topShade)"/>`;
-    artwork += `<image href="${bankLogo}" x="52" y="38" width="180" height="72" preserveAspectRatio="xMidYMid meet"/>`;
-    artwork += `<image href="${networkLogo}" x="730" y="38" width="76" height="64" preserveAspectRatio="xMidYMid meet"/>`;
+    if (config.issuer === "banco-master") {
+      const bankLogo = await toDataUrl("/banco-master.png");
+      artwork += `<image href="${bankLogo}" x="52" y="38" width="180" height="72" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:multiply"/>`;
+    } else if (config.issuer !== "none") {
+      const issuerLabel = config.issuer === "nubank" ? "NUBANK" : config.issuer === "inter" ? "INTER" : config.issuer === "c6" ? "C6 BANK" : config.issuer === "neon" ? "NEON" : config.issuer.toUpperCase();
+      artwork += `<text x="52" y="86" fill="#fff" font-family="Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="4">${escape(issuerLabel)}</text>`;
+    }
+    if (config.network === "mastercard") {
+      const networkLogo = await toDataUrl("/mastercard.png");
+      artwork += `<image href="${networkLogo}" x="730" y="438" width="76" height="64" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:multiply"/>`;
+    } else if (config.network !== "none") {
+      const networkLabel = config.network.toUpperCase();
+      artwork += `<text x="804" y="490" fill="#fff" font-family="Arial, sans-serif" font-size="21" font-weight="600" text-anchor="end" letter-spacing="2">${escape(networkLabel)}</text>`;
+    }
   } else {
     artwork += `<rect width="${width}" height="${height}" fill="url(#base)"/>`;
   }
