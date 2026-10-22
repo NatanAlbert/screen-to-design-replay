@@ -28,7 +28,19 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
       <clipPath id="clip"><rect width="${width}" height="${height}" rx="39"/></clipPath>
     </defs>`;
   let artwork = "";
-  if (design.name === "Spider-Man — Webline") {
+  const isSpiderMan = design.name === "Spider-Man — Webline";
+  // Keep the export's image treatment aligned with CardFront in WalletCard.tsx.
+  const tint = config.color === "gold" ? "sepia(.42) saturate(1.25)"
+    : config.color === "silver" ? "grayscale(.65) brightness(1.12)"
+    : config.color === "darkgreen" ? "hue-rotate(75deg) saturate(.78)"
+    : config.color === "navy" ? "hue-rotate(165deg) saturate(.8)"
+    : config.color === "black" || config.color === "graphite" ? "brightness(.68) saturate(.72)"
+    : config.color === "darkpurple" ? "hue-rotate(35deg) saturate(.85)" : "none";
+  const finish = config.material === "matte" ? "saturate(.82) contrast(.96)"
+    : config.material === "polished" ? "contrast(1.12) saturate(1.08)"
+    : config.material === "brushed" ? "contrast(1.08) saturate(.92)"
+    : config.material === "carbon" ? "contrast(1.18) brightness(.88)" : "contrast(1.02)";
+  if (isSpiderMan) {
     const response = await fetch("/card.jpeg", { credentials: "same-origin" });
     if (!response.ok) throw new Error("Não foi possível carregar a arte do cartão.");
     const blob = await response.blob();
@@ -38,14 +50,18 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
       reader.onerror = () => reject(new Error("Não foi possível ler a arte do cartão."));
       reader.readAsDataURL(blob);
     });
-    artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
+    artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" style="filter: ${tint} ${finish};"/>`;
+    if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)" style="mix-blend-mode:soft-light"/>`;
+    else if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)" style="mix-blend-mode:soft-light"/>`;
+    else if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)" style="mix-blend-mode:soft-light"/>`;
+    else artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)" style="mix-blend-mode:soft-light"/>`;
   } else {
     artwork += `<rect width="${width}" height="${height}" fill="url(#base)"/>`;
+    if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)"/>`;
+    if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)"/>`;
+    if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)"/>`;
+    if (config.material === "matte" || config.material === "satin") artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)"/>`;
   }
-  if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)"/>`;
-  if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)"/>`;
-  if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)"/>`;
-  if (config.material === "matte" || config.material === "satin") artwork += `<rect width="${width}" height="${height}" fill="url(#sheen)"/>`;
   if (config.pattern === "lines") {
     for (let i = 0; i < 6; i++) artwork += `<path d="M${405 + i * 45} 0L856 ${324 - i * 48}" stroke="${accent}" stroke-opacity="${0.35 - i * 0.04}" stroke-width="1.6" fill="none"/>`;
   } else if (config.pattern === "geometric") {
