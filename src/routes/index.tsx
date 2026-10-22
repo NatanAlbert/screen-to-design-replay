@@ -5,6 +5,7 @@ import { DESIGNS, COLLECTIONS, MATERIALS, COLORS, defaultConfig, getDesign, sani
 import { Card3DViewer } from "@/components/Card3DViewer";
 import { DevicePreview } from "@/components/DevicePreview";
 import { WalletCard } from "@/components/WalletCard";
+import { downloadCardPng } from "@/lib/card-export";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { I18nProvider, useI18n, FAQ, type TKey } from "@/lib/i18n";
 import { useLocal, KEYS } from "@/lib/storage";
@@ -32,7 +33,7 @@ function Vanta(){
  const choose=(id:string)=>{setHistory(h=>[...h.slice(-9),config]);setConfig(defaultConfig(getDesign(id)));go("customize")};
  const filtered=useMemo(()=>{let a=DESIGNS.filter(d=>(d.name+" "+d.collection).toLowerCase().includes(query.toLowerCase()));if(collection!=="all")a=a.filter(d=>d.collection===collection);if(material!=="all")a=a.filter(d=>d.defaults.material===material);if(favOnly)a=a.filter(d=>favorites.includes(d.id));if(sort==="az")a.sort((x,y)=>x.name.localeCompare(y.name));if(sort==="za")a.sort((x,y)=>y.name.localeCompare(x.name));if(sort==="collection")a.sort((x,y)=>x.collection.localeCompare(y.collection)||x.order-y.order);return a},[query,collection,material,favOnly,favorites,sort]);
  const save=()=>{setSaved(a=>[config,...a.filter(c=>JSON.stringify(c)!==JSON.stringify(config))].slice(0,30));setNotice(t("cz.saved"))};
- const exportPng=async()=>{try{if(!exportRef.current)throw new Error("Preview unavailable");await downloadCardPng(exportRef.current,`vanta-${active.id}.png`);setNotice(lang==="pt"?"PNG exportado. Confira seus downloads.":"PNG exported. Check your downloads.")}catch(error){const detail=error instanceof Error?error.message:"Unknown export error";console.error("VANTA PNG export failed:",error);setNotice(lang==="pt"?`Falha na exportação: ${detail}`:`Export failed: ${detail}`)}};
+ const exportPng=async()=>{try{if(!exportRef.current)throw new Error("Preview unavailable");await downloadCardPng(config,`vanta-${active.id}.png`);setNotice(lang==="pt"?"PNG exportado. Confira seus downloads.":"PNG exported. Check your downloads.")}catch(error){const detail=error instanceof Error?error.message:"Unknown export error";console.error("VANTA PNG export failed:",error);setNotice(lang==="pt"?`Falha na exportação: ${detail}`:`Export failed: ${detail}`)}};
  const fav=(id:string)=>setFavorites(a=>a.includes(id)?a.filter(x=>x!==id):[...a,id]);
  return <div className="min-h-screen bg-background text-foreground">
  <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#08090b]/90 backdrop-blur-xl"><div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-4 sm:px-8 lg:px-10">
@@ -64,86 +65,6 @@ function Vanta(){
  {section==="settings"&&<main className="mx-auto max-w-[900px] px-5 py-10 sm:px-8 md:px-10 md:py-16"><Heading eyebrow="07 — PREFERENCES" title={t("set.title")} subtitle={t("set.dataNote")}/><div className="mt-8 divide-y divide-white/10 border-y border-white/10"><div className="flex items-center justify-between gap-5 py-5"><div><h3 className="text-sm">{t("set.lang")}</h3><p className="mt-1 text-xs text-muted-foreground">Português brasileiro / English</p></div><LanguageSwitcher/></div><div className="flex flex-wrap items-center justify-between gap-4 py-5"><div><h3 className="text-sm">{t("set.data")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("set.dataNote")}</p></div><div className="flex flex-wrap gap-2"><button className="btn-ghost" onClick={()=>{setFavorites([]);setNotice(t("set.cleared"))}}>{t("set.clearFav")}</button><button className="btn-ghost" onClick={()=>{setSaved([]);setNotice(t("set.cleared"))}}>{t("set.clearSaved")}</button></div></div>{notice&&<p className="py-3 text-xs text-signal">{notice}</p>}</div></main>}
  <footer className="border-t border-white/[0.08] px-5 py-8 sm:px-8 md:px-10"><div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-5 sm:flex-row sm:items-center"><button onClick={()=>go("home")} className="text-xs font-semibold tracking-[.3em]">VANTA <span className="font-normal tracking-normal text-muted-foreground">STUDIO</span></button><p className="max-w-lg text-xs leading-5 text-muted-foreground">Visual concept only. VANTA does not modify real payment cards or add designs to Apple Wallet. Demo models and pricing.</p><div className="flex flex-wrap gap-4 text-xs text-muted-foreground">{nav.slice(1,6).map(n=><button key={n.id} onClick={()=>go(n.id)} className="hover:text-white">{t(n.key)}</button>)}</div></div></footer>
  <div className="fixed bottom-3 right-3 z-30 hidden items-center gap-2 border border-white/10 bg-[#111215]/95 px-3 py-2 text-[10px] uppercase tracking-[.14em] text-muted-foreground shadow-xl sm:flex"><span className="size-1.5 rounded-full bg-signal"/>{t("common.demo")} / NO PAYMENT</div></div>;
-}
-async function downloadCardPng(node: HTMLElement, filename: string) {
-  const source = node.firstElementChild as HTMLElement | null;
-  if (!source) throw new Error("Card preview is empty");
-
-  // Safari can mark a canvas as unsafe when an SVG foreignObject references
-  // a normal image URL. Inline same-origin artwork before rasterizing.
-  const clone = source.cloneNode(true) as HTMLElement;
-  const originalImages = Array.from(source.querySelectorAll("img"));
-  const clonedImages = Array.from(clone.querySelectorAll("img"));
-  await Promise.all(clonedImages.map(async (img, index) => {
-    const original = originalImages[index];
-    if (!original) return;
-    const src = original.currentSrc || original.src;
-    if (!src) return;
-    try {
-      const response = await fetch(src, { credentials: "same-origin" });
-      if (!response.ok) throw new Error(`Could not load card artwork (${response.status})`);
-      const blob = await response.blob();
-      img.src = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Could not inline card artwork"));
-        reader.onerror = () => reject(new Error("Could not read card artwork"));
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.warn("Could not inline card artwork for PNG export:", error);
-      // Preserve the specific reason instead of hiding it behind a generic browser message.
-      throw error;
-    }
-  }));
-
-  const copyStyles = (from: Element, to: Element) => {
-    const computed = window.getComputedStyle(from);
-    to.setAttribute("style", Array.from(computed).map((key) => key + ":" + computed.getPropertyValue(key)).join(";"));
-    Array.from(from.children).forEach((child, i) => {
-      const next = to.children[i];
-      if (next) copyStyles(child, next);
-    });
-  };
-  copyStyles(source, clone);
-
-  // Use an SVG image as an intermediate because the card is HTML/CSS based.
-  const markup = new XMLSerializer().serializeToString(clone);
-  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="757" viewBox="0 0 600 378"><foreignObject width="600" height="378"><div xmlns="http://www.w3.org/1999/xhtml" style="width:600px;height:378px;overflow:hidden">' + markup + '</div></foreignObject></svg>';
-  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
-  let downloadUrl: string | undefined;
-  try {
-    const img = new Image();
-    img.decoding = "sync";
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error("Safari could not render the card SVG"));
-      img.src = url;
-    });
-    const canvas = document.createElement("canvas");
-    canvas.width = 1200;
-    canvas.height = 757;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Canvas is unavailable");
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      try {
-        canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Browser could not create a PNG from the canvas")), "image/png");
-      } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error)));
-      }
-    });
-    downloadUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = filename;
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } finally {
-    URL.revokeObjectURL(url);
-    if (downloadUrl) window.setTimeout(() => URL.revokeObjectURL(downloadUrl!), 1000);
-  }
 }
 function Heading({eyebrow,title,subtitle}:{eyebrow:string;title:string;subtitle?:string}){return <div><div className="eyebrow mb-4">{eyebrow}</div><h1 className="display text-4xl md:text-6xl">{title}</h1>{subtitle&&<p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{subtitle}</p>}</div>}
 function Options({title,children}:{title:string;children:ReactNode}){return <div className="space-y-3"><div className="eyebrow">{title}</div><div className="flex flex-wrap gap-2">{children}</div></div>}
