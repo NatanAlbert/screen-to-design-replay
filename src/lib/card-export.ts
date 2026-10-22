@@ -45,13 +45,29 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
     const response = await fetch("/card.jpeg", { credentials: "same-origin" });
     if (!response.ok) throw new Error("Não foi possível carregar a arte do cartão.");
     const blob = await response.blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Não foi possível preparar a arte."));
-      reader.onerror = () => reject(new Error("Não foi possível ler a arte do cartão."));
-      reader.readAsDataURL(blob);
-    });
-    artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" style="filter: ${tint} ${finish};"/>`;
+    const sourceUrl = URL.createObjectURL(blob);
+    let dataUrl: string;
+    try {
+      const sourceImage = new Image();
+      await new Promise<void>((resolve, reject) => {
+        sourceImage.onload = () => resolve();
+        sourceImage.onerror = () => reject(new Error("Não foi possível carregar a arte do cartão."));
+        sourceImage.src = sourceUrl;
+      });
+      // Apply the filters to real pixels first. Safari iOS does not reliably apply
+      // CSS filter styles on SVG <image> elements when the SVG is rasterized.
+      const imageCanvas = document.createElement("canvas");
+      imageCanvas.width = sourceImage.naturalWidth || width;
+      imageCanvas.height = sourceImage.naturalHeight || height;
+      const imageContext = imageCanvas.getContext("2d");
+      if (!imageContext) throw new Error("Canvas indisponível para tratar a arte.");
+      imageContext.filter = `${tint} ${finish}`;
+      imageContext.drawImage(sourceImage, 0, 0, imageCanvas.width, imageCanvas.height);
+      dataUrl = imageCanvas.toDataURL("image/png");
+    } finally {
+      URL.revokeObjectURL(sourceUrl);
+    }
+    artwork += `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
     if (config.material === "polished") artwork += `<rect width="${width}" height="${height}" fill="url(#shine)" style="mix-blend-mode:soft-light"/>`;
     else if (config.material === "brushed") artwork += `<rect width="${width}" height="${height}" fill="url(#brush)" style="mix-blend-mode:soft-light"/>`;
     else if (config.material === "carbon") artwork += `<rect width="${width}" height="${height}" fill="url(#carbon)" style="mix-blend-mode:soft-light"/>`;
