@@ -15,7 +15,7 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   const escape = (value: string) => value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[char]!);
   const textAnchor = config.textPos === "center" ? "middle" : config.textPos === "bottom-right" ? "end" : "start";
   const textX = config.textPos === "center" ? 428 : config.textPos === "bottom-right" ? 796 : 60;
-  const textY = config.textPos === "center" ? 285 : 470;
+  const textY = config.textPos === "center" ? 285 : config.textPos === "bottom-left" && config.lastFour ? 410 : 470;
   const font = config.font === "mono" ? "monospace" : config.font === "serif" ? "Georgia, serif" : "Arial, Helvetica, sans-serif";
   const defs = `
     <defs>
@@ -76,8 +76,9 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
   const network = config.network !== "none" ? config.network.toUpperCase() : design.collection.toUpperCase();
   const labels = design.name === "Daniel Vorcaro — Banco Master" ? "" : `<text x="60" y="95" fill="${ink}" font-family="Arial, sans-serif" font-size="34" font-weight="600" letter-spacing="7">${escape(issuer === "BANCO-MASTER" ? "BANCO MASTER" : issuer)}</text><text x="796" y="100" fill="${ink}" fill-opacity=".7" font-family="monospace" font-size="17" text-anchor="end" letter-spacing="2">${escape(network)}</text>`;
   const cardText = config.text ? `<text x="${textX}" y="${textY}" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="${font}" font-size="${config.font === "serif" ? 52 : 38}" text-anchor="${textAnchor}" letter-spacing="${config.font === "serif" ? 1 : 4}">${escape(config.font === "serif" ? config.text : config.text.toUpperCase())}</text>` : "";
+  const cardNumber = config.lastFour ? `<text x="60" y="500" fill="${design.name === "Daniel Vorcaro — Banco Master" ? "#fff" : ink}" font-family="monospace" font-size="24" text-anchor="start" letter-spacing="3" opacity=".94">•••• ${escape(config.lastFour)}</text>` : "";
   const demo = design.name === "Daniel Vorcaro — Banco Master" || config.textPos === "bottom-right" ? "" : `<text x="796" y="480" fill="${ink}" fill-opacity=".5" font-family="monospace" font-size="20" text-anchor="end" letter-spacing="4">DEMO</text>`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${defs}<g clip-path="url(#clip)">${artwork}<rect x="2" y="2" width="852" height="536" rx="37" fill="none" stroke="${accent}" stroke-opacity=".55" stroke-width="3"/>${labels}${cardText}${demo}</g></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${defs}<g clip-path="url(#clip)">${artwork}<rect x="2" y="2" width="852" height="536" rx="37" fill="none" stroke="${accent}" stroke-opacity=".55" stroke-width="3"/>${labels}${cardText}${cardNumber}${demo}</g></svg>`;
   const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
   let pngUrl: string | undefined;
   try {
