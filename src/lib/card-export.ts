@@ -44,14 +44,14 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
     artwork += `<image href="${portrait}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>`;
     if (config.issuer === "banco-master") {
       const bankLogo = await toDataUrl("/banco-master.png");
-      artwork += `<image href="${bankLogo}" x="4" y="38" width="420" height="168" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
+      artwork += `<image href="${bankLogo}" x="-18" y="38" width="420" height="168" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
     } else if (config.issuer !== "none") {
       const issuerLabel = config.issuer === "nubank" ? "NUBANK" : config.issuer === "inter" ? "INTER" : config.issuer === "c6" ? "C6 BANK" : config.issuer === "neon" ? "NEON" : config.issuer.toUpperCase();
       artwork += `<text x="52" y="86" fill="#fff" font-family="Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="4">${escape(issuerLabel)}</text>`;
     }
     if (config.network === "mastercard") {
       const networkLogo = await toDataUrl("/mastercard.png");
-      artwork += `<image href="${networkLogo}" x="468" y="402" width="384" height="134" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
+      artwork += `<image href="${networkLogo}" x="496" y="406" width="384" height="134" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:screen"/>`;
     } else if (config.network !== "none") {
       const networkLabel = config.network.toUpperCase();
       artwork += `<text x="804" y="490" fill="#fff" font-family="Arial, sans-serif" font-size="21" font-weight="600" text-anchor="end" letter-spacing="2">${escape(networkLabel)}</text>`;
