@@ -24,16 +24,16 @@ export async function downloadCardPng(
   if (isIOS) {
     const file = new File([png], filename, { type: "image/png" });
 
-    // Prefer the native iOS share sheet: it avoids Safari pop-up blocking and
-    // lets the user choose Save Image or Save to Files.
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    // iOS browsers often ignore download= for Blob URLs. Only report success
+    // when the native share sheet actually accepts the PNG.
+    if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
       await navigator.share({ files: [file], title: filename });
       return "shared";
     }
+    throw new Error("Este navegador não permite salvar o PNG diretamente. Abra o VANTA no Safari fora da prévia do Lovable e tente novamente.");
   }
 
-  // No popup/new tab fallback. Safari can block window.open even when the
-  // image itself was generated correctly; trigger a direct file download.
+  // Desktop browsers support direct Blob URL downloads.
   const pngUrl = URL.createObjectURL(png);
   const link = document.createElement("a");
   link.href = pngUrl;
