@@ -55,6 +55,7 @@ export interface CardConfig {
   pattern: Pattern;
   accent: Accent;
   text: string;
+  lastFour: string;
   font: FontId;
   textPos: TextPos;
   issuer: IssuerId;
@@ -131,6 +132,7 @@ export const defaultConfig = (d: Design): CardConfig => ({
   designId: d.id,
   ...d.defaults,
   text: "VANTA MEMBER",
+  lastFour: "",
   font: "sans",
   textPos: "bottom-left",
   issuer: "none",
@@ -149,6 +151,7 @@ export function sanitizeConfig(c: CardConfig): CardConfig {
     pattern: pick(c.pattern, d.allowed.patterns, d.defaults.pattern),
     accent: pick(c.accent, d.allowed.accents, d.defaults.accent),
     text: (c.text ?? "").slice(0, TEXT_MAX),
+    lastFour: String(c.lastFour ?? "").replace(/\\D/g, "").slice(0, 4),
     issuer: ISSUERS.some((item) => item.id === c.issuer) ? c.issuer : "none",
     network: NETWORKS.some((item) => item.id === c.network) ? c.network : "none",
   };
