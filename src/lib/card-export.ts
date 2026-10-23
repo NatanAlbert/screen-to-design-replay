@@ -103,7 +103,50 @@ export async function downloadCardPng(config: CardConfig, filename: string): Pro
     canvas.height = height * scale;
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Canvas indisponível neste navegador.");
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    if (design.collection === "American Express") {
+      // Draw Amex JPEGs directly to canvas. Safari/iOS can omit raster images
+      // embedded inside an SVG when converting that SVG to PNG.
+      const amexImage = new Image();
+      await new Promise<void>((resolve, reject) => {
+        amexImage.onload = () => resolve();
+        amexImage.onerror = () => reject(new Error("Não foi possível carregar a arte American Express para exportação."));
+        amexImage.src = design.id === "amex-kehind" ? "/amex%20kehind.jpeg" : "/amex.jpeg";
+      });
+      const sourceRatio = amexImage.naturalWidth / amexImage.naturalHeight;
+      const targetRatio = canvas.width / canvas.height;
+      let sx = 0, sy = 0, sw = amexImage.naturalWidth, sh = amexImage.naturalHeight;
+      if (sourceRatio > targetRatio) {
+        sw = amexImage.naturalHeight * targetRatio;
+        sx = (amexImage.naturalWidth - sw) / 2;
+      } else {
+        sh = amexImage.naturalWidth / targetRatio;
+        sy = (amexImage.naturalHeight - sh) / 2;
+      }
+      context.drawImage(amexImage, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+      context.save();
+      context.strokeStyle = accent;
+      context.globalAlpha = 0.55;
+      context.lineWidth = 6;
+      context.beginPath();
+      context.roundRect(4, 4, canvas.width - 8, canvas.height - 8, 76);
+      context.stroke();
+      context.restore();
+      if (config.text) {
+        context.fillStyle = "#fff";
+        context.font = `${config.font === "serif" ? "104px Georgia, serif" : config.font === "mono" ? "76px monospace" : "76px Arial, Helvetica, sans-serif"}`;
+        context.textAlign = textAnchor;
+        context.textBaseline = "alphabetic";
+        context.fillText(config.font === "serif" ? config.text : config.text.toUpperCase(), textX * scale, textY * scale, canvas.width - 100);
+      }
+      if (config.lastFour) {
+        context.fillStyle = "rgba(255,255,255,.94)";
+        context.font = "84px monospace";
+        context.textAlign = "start";
+        context.fillText(`•••• ${config.lastFour}`, 60 * scale, 500 * scale, canvas.width - 120);
+      }
+    } else {
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
     const png = await new Promise<Blob>((resolve, reject) => canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Não foi possível criar o PNG.")), "image/png"));
     pngUrl = URL.createObjectURL(png);
     if (isIOS) {
